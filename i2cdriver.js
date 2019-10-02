@@ -302,16 +302,19 @@ const i2c_bus_promisified = (device) => {
     }),
 
     //SMBus
-    readByte: (addr, register) => waitMyTurn(async () => {
-      return device.regrd(addr, register, 1)
+    readByte: (addr, cmd) => waitMyTurn(async () => {
+      checkCmd(cmd)
+      return device.regrd(addr, cmd, 1)
     }),
 
-    readWord: (addr, register) => waitMyTurn(() => {
-      return device.regrd(addr, register, 2)
+    readWord: (addr, cmd) => waitMyTurn(() => {
+      checkCmd(cmd)
+      return device.regrd(addr, cmd, 2)
     }),
 
-    readI2cBlock: async (addr, register, length, buffer) => {
-      const buff = await device.regrd(addr, register, length)
+    readI2cBlock: async (addr, cmd, length, buffer) => {
+      checkCmd(cmd)
+      const buff = await device.regrd(addr, cmd, length)
       buff.copy(buffer)
       return {
         bytesRead: length,
@@ -327,12 +330,14 @@ const i2c_bus_promisified = (device) => {
       return i2c_bus_promise_iface.i2cWrite(addr, 1, Buffer.alloc(1, byte))
     },
 
-    writeByte: (addr, register, byte) => waitMyTurn(async () => {
-      return device.regwr(addr, register, byte)
+    writeByte: (addr, cmd, byte) => waitMyTurn(async () => {
+      checkCmd(cmd)
+      return device.regwr(addr, cmd, byte)
     }),
 
-    writeWord: (addr, register, word) => waitMyTurn(() => {
-      return device.regwr(addr, register, [word >> 8, word & 0xFF])
+    writeWord: (addr, cmd, word) => waitMyTurn(() => {
+      checkCmd(cmd)
+      return device.regwr(addr, cmd, [word >> 8, word & 0xFF])
     }),
 
     // This sends a single bit to the device, at the place of the Rd/Wr bit.
@@ -341,16 +346,22 @@ const i2c_bus_promisified = (device) => {
       throw new Error('Not Implemented')
     },
 
-    writeI2cBlock: (addr, register, length, buffer) => waitMyTurn(async () => {
+    writeI2cBlock: (addr, cmd, length, buffer) => waitMyTurn(async () => {
+      checkCmd(cmd)
       if (length !== buffer.length) {
         buffer = buffer.subarray(0, length)
       }
-      const buff = Buffer.allocUnsafe(length + 1, register)
+      const buff = Buffer.allocUnsafe(length + 1, cmd)
       buffer.copy(buff, 1)
-      return device.regwr(addr, register, buff)
+      return device.regwr(addr, cmd, buff)
     })
   }
   return i2c_bus_promise_iface
+}
+const checkCmd = (cmd) => {
+  if (typeof cmd !== 'number' || cmd > 0xFF) {
+    throw new Error('Invalid I2C command')
+  }
 }
 const SyncNotImplemented = () => {
   throw new Error('Sync functions are not implemented by the i2cdriver module')
