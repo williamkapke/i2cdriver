@@ -17,7 +17,7 @@ This library contains functions for:
 // const i2c = require('i2c-bus')
 // const bus_id = 1
 
-const i2c = require('i2cdriver')['i2c-bus']
+const i2c = require('i2cdriver/i2c-bus')
 const bus_id = '/dev/tty.usbserial-DO01INSW'
 
 const tfminiplus = require('tfmini-plus')
