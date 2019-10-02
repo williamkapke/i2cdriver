@@ -1,0 +1,23 @@
+{
+  "name": "i2cdriver",
+  "version": "1.0.0",
+  "description": "A Node.js library for an i2cdriver device http://i2cdriver.com",
+  "main": "i2cdriver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/williamkapke/i2cdriver.git"
+  },
+  "author": "William Kapke",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/williamkapke/i2cdriver/issues"
+  },
+  "homepage": "https://github.com/williamkapke/i2cdriver#readme",
+  "dependencies": {
+    "@serialport/bindings": "^2.0.8",
+    "debug": "^4.1.1"
+  }
+}
