@@ -73,7 +73,7 @@ Starts a read or write session to a device on the bus.
 
 ### read(length)
 Issues a read request for `length` bytes. You should call [start(addr, 'read')](#startaddr-rw) first. The i2cdriver does not
-restrict you from sending a read request out of sequence- but the result will be unknown (probably not good).
+restrict you from sending a read/write request out of sequence- but the result will be unknown (probably not good).
 
 **Note:** The [i2c-bus](#i2c-bus) APIs coordinate these calls properly.
 
@@ -81,7 +81,7 @@ restrict you from sending a read request out of sequence- but the result will be
 
 ### write(buff)
 Writes the Buffer to the i2c bus. You should call [start(addr, 'write')](#startaddr-rw) first. The i2cdriver does not
-restrict you from sending a read request out of sequence- but the result will be unknown (probably not good).
+restrict you from sending a read/write request out of sequence- but the result will be unknown (probably not good).
 
 `buff` - A Buffer of the bytes you want to send
 
@@ -95,7 +95,7 @@ A helper function that reads from a register on a device.
 
 `addr` - The i2c device address<br>
 `register` - (byte) The register to read from.<br>
-`size` - The number of bytes to read. (e.g.: 2 for a 16 bit register)
+`size` - The number of bytes to read. (e.g.: 2 for a 16 bit value)
 
 
 ### regwr(addr, register, value)
