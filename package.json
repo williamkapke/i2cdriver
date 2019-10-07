@@ -1,6 +1,6 @@
 {
   "name": "i2cdriver",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "A Node.js library for an i2cdriver device http://i2cdriver.com",
   "main": "i2cdriver.js",
   "scripts": {

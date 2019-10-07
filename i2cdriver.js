@@ -50,10 +50,14 @@ const i2cFuncs = {
   smbusReadI2cBlock: true,
   smbusWriteI2cBlock: true,
 }
+const opened = {}
 
 const open = async (path, baudRate=1000000) => {
-  const port = new DefaultBindings({})
-  await port.open(path, {baudRate})
+  const port = opened[path] || new DefaultBindings({})
+  if(!port.isOpen) {
+    await port.open(path, {baudRate})
+    opened[path] = port
+  }
 
   const write = async (data) => {
     if (!port.isOpen) {
@@ -225,7 +229,7 @@ const open = async (path, baudRate=1000000) => {
       }
     },
 
-    get 'i2c-bus'() { return i2c_bus_promisified(device) }
+    get 'i2c-bus-promise'() { return i2c_bus_promisified(device) }
   }
 
 
