@@ -191,7 +191,7 @@ const open = async (path, baudRate=1000000) => {
         await iface.start(addr, 'write')
         await iface.write(Buffer.from(register))
         await iface.start(addr, 'read')
-        const result = await iface.read(size)
+        const result = await iface.read(length)
         await iface.stop()
         return result
       }
