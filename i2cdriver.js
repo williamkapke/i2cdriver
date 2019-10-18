@@ -148,13 +148,14 @@ const open = async (path, baudRate=1000000) => {
         return read(length)
       }
 
-      //chunked
+      //chunked - only works if device tracks a read cursor
       const result = Buffer.allocUnsafe(length)
       for (let i = 0; i < length; i+=64) {
-        await writeAndDrain(Buffer.alloc(1, 0x7f + length))
         const n = Math.min(length - i, 64);
-        debug_command('0x%h', n)
-        (await read(n)).copy(result, i)
+        debug_command('0x%h', n, i, length - i)
+        await writeAndDrain(Buffer.alloc(1, 0x7f + n))
+        const buff = await read(n)
+        buff.copy(result, i)
       }
       return result
     },
@@ -183,14 +184,39 @@ const open = async (path, baudRate=1000000) => {
       debug_command('P')
       await writeAndDrain(cmd.P)
     },
-    regrd: async (addr, register, size = 1) => {
+    regrd: async (addr, register, length = 1) => {
       if (!Array.isArray(register)) register = [register]
-      await iface.start(addr, 'write')
-      await iface.write(Buffer.from(register))
-      await iface.start(addr, 'read')
-      const value = await iface.read(size)
-      await iface.stop()
-      return value
+      if (length <= 64) {
+        //fast path
+        await iface.start(addr, 'write')
+        await iface.write(Buffer.from(register))
+        await iface.start(addr, 'read')
+        const result = await iface.read(size)
+        await iface.stop()
+        return result
+      }
+
+      const size = register.length // how many bytes is this register?
+      register = Buffer.from(register)
+
+      //we need the register as a number so we can increment it
+      let index = parseInt(register.toString('hex'), 16)
+
+      const result = Buffer.allocUnsafe(length)
+      for (let i = 0; i < length; i+=64) {
+        index += i
+        await iface.start(addr, 'write')
+        await iface.write(Buffer.from(index.toString(16).padStart(size * 2, '0'), 'hex'))
+
+        await iface.start(addr, 'read')
+        const n = Math.min(length - i, 64);
+        const buff = await iface.read(n)
+        buff.copy(result, i)
+
+        await iface.stop()
+      }
+
+      return result
     },
     regwr: async (addr, register, value) => {
       if (!Array.isArray(value)) value = [value]
@@ -318,7 +344,8 @@ const i2c_bus_promisified = (device) => {
 
     readI2cBlock: async (addr, cmd, length, buffer) => {
       checkCmd(cmd)
-      const buff = await device.regrd(addr, cmd, length)
+
+      const buff = await device.readChunked(addr, cmd, length)
       buff.copy(buffer)
       return {
         bytesRead: length,
