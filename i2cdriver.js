@@ -255,7 +255,7 @@ const open = async (path, baudRate=1000000) => {
       }
     },
 
-    get 'i2c-bus-promise'() { return i2c_bus_promisified(device) }
+    get 'i2c-bus-promise'() { return i2c_bus_promisified(iface) }
   }
 
 
